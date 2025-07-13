@@ -6,6 +6,7 @@ import namespaces from "./namespaces/index.js";
 
 const server = http.createServer(app);
 const io = initSocket(server);
+namespaces(io);
 
 server.listen(constants.PORT, () => {
     console.log(`Server is running on port ${constants.PORT}`);
