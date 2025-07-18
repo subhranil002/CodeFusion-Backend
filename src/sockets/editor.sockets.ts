@@ -6,124 +6,110 @@ type User = {
     isTyping: boolean;
 };
 
-const rooms = new Map<string, Set<User>>();
+const rooms = new Map<string, Map<string, User>>();
 
-function editorSockets(socket: CustomSocket, editorNamespace: Namespace) {
-    let currentRoom: string | null = null;
-    let currentUser: string | null = null;
+export default function editorSockets(
+    socket: CustomSocket,
+    editorNamespace: Namespace
+) {
+    socket.data.roomId = null as string | null;
+    socket.data.userName = null as string | null;
+    socket.data.typing = false as boolean;
 
-    function leaveRoom(roomId: string, userName: string) {
+    function leaveRoom() {
+        const { roomId, userName } = socket.data;
+        if (!roomId || !userName) return;
+
         socket.leave(roomId);
 
-        const userSet = rooms.get(roomId);
-        if (userSet) {
-            for (const u of userSet) {
-                if (u.name === userName) {
-                    userSet.delete(u);
-                    break;
-                }
-            }
+        const state = rooms.get(roomId);
+        if (!state) return;
+        state.delete(userName);
+
+        if (state.size === 0) {
+            rooms.delete(roomId);
+        } else {
+            socket.to(roomId).emit("userLeft", {
+                userName,
+                users: Array.from(state.values()),
+            });
         }
 
-        editorNamespace
-            .to(roomId)
-            .emit("userLeft", {
-                userName,
-                users: Array.from(rooms.get(roomId)!),
-            });
-
-        currentRoom = null;
-        currentUser = null;
+        socket.data.roomId = null;
+        socket.data.userName = null;
     }
 
-    socket.on(
-        "verifyUniqueUser",
-        ({ roomId, userName }: { roomId: string; userName: string }) => {
-            let unique = true;
-            if (!rooms.has(roomId) || rooms.get(roomId)!.size === 0) {
-                editorNamespace.to(socket.id).emit("uniqueUser", {
-                    unique,
-                    roomId,
-                    userName,
-                });
-            } else {
-                const userSet = rooms.get(roomId)!;
-                for (const u of userSet) {
-                    if (u.name === userName) {
-                        unique = false;
-                        break;
-                    }
-                }
-                editorNamespace.to(socket.id).emit("uniqueUser", {
-                    unique,
-                    roomId,
-                    userName,
-                });
-            }
-        }
-    );
+    socket.once("disconnect", leaveRoom);
+    socket.on("leaveRoom", leaveRoom);
+
+    socket.on("verifyUniqueUser", ({ roomId, userName }) => {
+        const state = rooms.get(roomId) ?? new Map<string, User>();
+        const unique = !state.has(userName);
+        editorNamespace.to(socket.id).emit("uniqueUser", {
+            unique,
+            roomId,
+            userName,
+        });
+    });
 
     socket.on(
         "join",
         ({ roomId, userName }: { roomId: string; userName: string }) => {
-            if (currentRoom && currentUser) {
-                leaveRoom(currentRoom, currentUser);
-            }
+            leaveRoom();
 
-            currentRoom = roomId;
-            currentUser = userName;
             socket.join(roomId);
+            socket.data.roomId = roomId;
+            socket.data.userName = userName;
 
-            if (!rooms.has(roomId)) {
-                rooms.set(
-                    roomId,
-                    new Set<User>([{ name: userName, isTyping: false }])
-                );
-            } else {
-                rooms.get(roomId)!.add({ name: userName, isTyping: false });
-            }
+            const state = rooms.get(roomId) ?? new Map<string, User>();
+            state.set(userName, { name: userName, isTyping: false });
+            rooms.set(roomId, state);
 
-            editorNamespace.to(roomId).emit("userJoined", {
+            editorNamespace.to(socket.id).emit("updateUsers", {
+                users: Array.from(state.values()),
+            });
+            socket.to(roomId).emit("userJoined", {
                 userName,
-                users: Array.from(rooms.get(roomId)!),
+                users: Array.from(state.values()),
             });
         }
     );
 
-    socket.on("codeChange", ({ roomId, code }) => {
+    socket.on("startTyping", () => {
+        const { roomId, userName, typing } = socket.data;
+        if (!roomId || !userName || typing) return;
+
+        socket.data.typing = true;
+        const state = rooms.get(roomId)!;
+        state.get(userName)!.isTyping = true;
+
+        socket.to(roomId).emit("updateUsers", {
+            users: Array.from(state.values()),
+        });
+    });
+
+    socket.on("stopTyping", () => {
+        const { roomId, userName, typing } = socket.data;
+        if (!roomId || !userName || !typing) return;
+
+        socket.data.typing = false;
+        const state = rooms.get(roomId)!;
+        state.get(userName)!.isTyping = false;
+
+        socket.to(roomId).emit("updateUsers", {
+            users: Array.from(state.values()),
+        });
+    });
+
+    socket.on("codeChange", ({ code }: { code: string }) => {
+        const { roomId } = socket.data;
+        if (!roomId) return;
         socket.to(roomId).emit("codeUpdate", code);
     });
 
-    socket.on("leaveRoom", ({ userName }: { userName: string }) => {
-        if (currentRoom) {
-            leaveRoom(currentRoom, userName);
-        }
-    });
-
-    socket.on("typing", () => {
-        const userSet = rooms.get(currentRoom!);
-        if (userSet) {
-            for (const u of userSet) {
-                if (u.name === currentUser) {
-                    u.isTyping = true;
-                }
-            }
-            editorNamespace.to(currentRoom!).emit("userTyping", {
-                userName: currentUser,
-                users: Array.from(userSet),
-            });
-        }
-    });
-
-    socket.on("languageChange", ({ roomId, language }) => {
+    socket.on("languageChange", ({ language }: { language: string }) => {
+        const { roomId } = socket.data;
+        if (!roomId) return;
         socket.to(roomId).emit("languageUpdate", language);
     });
-
-    socket.on("disconnect", () => {
-        if (currentRoom && currentUser) {
-            leaveRoom(currentRoom, currentUser);
-        }
-    });
 }
-
-export default editorSockets;
