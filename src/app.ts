@@ -1,18 +1,27 @@
 import express from "express";
 const app = express();
-import { runCode } from "./services/codeexecuter.services.js";
+import appRouter from "./routes/index.js";
+import errorMiddleware from "./middlewares/error.middleware.js";
+import cors from "cors";
+import constants from "./constants.js";
+import morgan from "morgan";
 
-// runCode("console.log('Hello World!')", "typescript");
-
+// Middlewares
 app.use(express.json());
+app.use(
+    express.urlencoded({
+        extended: true,
+    })
+);
+app.use(
+    cors({
+        origin: constants.FRONTEND_URL,
+    })
+);
+app.use(morgan("dev"));
 
-app.get("/", (req, res) => {
-    return res
-        .status(200)
-        .json({
-            success: true,
-            message: "Up and running!",
-        })
-});
+// Routes
+app.use("/api", appRouter);
+app.use(errorMiddleware);
 
 export default app;
