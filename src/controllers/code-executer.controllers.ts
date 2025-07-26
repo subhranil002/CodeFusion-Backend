@@ -1,41 +1,65 @@
 import { runCode } from "../services/code-executer.services.js";
-import { Request, Response } from "express";
-import { ApiResponse, asyncHandler } from "../utils/index.js";
+import { Request, Response, NextFunction } from "express";
+import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
 
 export const getLanguages = asyncHandler(
-    async (req: Request, res: Response) => {
-        const langIdMap: { [key: string]: number } = {
-            bash: 46, // Bash (5.0.0)
-            c: 110, // C (Clang 19.1.7)
-            csharp: 51, // C# (Mono 6.6.0.161)
-            cpp: 105, // C++ (GCC 14.1.0)
-            go: 107, // Go (1.23.5)
-            java: 91, // Java (JDK 17.0.6)
-            javascript: 102, // JavaScript (Node.js 22.08.0)
-            kotlin: 111, // Kotlin (2.1.10)
-            php: 98, // PHP (8.3.11)
-            python: 109, // Python (3.13.2)
-            r: 99, // R (4.4.1)
-            ruby: 72, // Ruby (2.7.0)
-            rust: 108, // Rust (1.85.0)
-            sql: 82, // SQL (SQLite 3.27.2)
-            typescript: 101, // TypeScript (5.6.2)
-        };
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const languageList = [
+                { id: 110, name: "C" },
+                { id: 105, name: "CPP" },
+                { id: 107, name: "Go" },
+                { id: 91, name: "Java" },
+                { id: 102, name: "JavaScript" },
+                { id: 111, name: "Kotlin" },
+                { id: 98, name: "PHP" },
+                { id: 109, name: "Python" },
+                { id: 72, name: "Ruby" },
+                { id: 108, name: "Rust" },
+                { id: 46, name: "Shell" },
+                { id: 101, name: "TypeScript" },
+            ]
 
-        return res
-            .status(200)
-            .json(
-                new ApiResponse("Languages retrieved successfully", langIdMap)
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(
+                        "Languages retrieved successfully",
+                        languageList
+                    )
+                );
+        } catch (error: any) {
+            return next(
+                new ApiError(
+                    `code-executer.controller :: getLanguages :: ${error}`,
+                    error.statusCode || 500
+                )
             );
+        }
     }
 );
 
-// export const codeRunner = asyncHandler(async (req: Request, res: Response) => {
-//     const { code, langId } = req.body;
+export const codeRunner = asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const { code, langId, stdIn } = req.body;
 
-//     if (!code || !langId) {
-//         return res.status(400).json(new ApiResponse("All fields are required"));
-//     }
+            if (!code || !langId) {
+                throw new ApiError("All fields are required", 400);
+            }
 
-//     const result = await runCode(code, langId);
-// });
+            const result = await runCode(code, langId, stdIn);
+
+            return res
+                .status(200)
+                .json(new ApiResponse("Code executed successfully", result));
+        } catch (error: any) {
+            return next(
+                new ApiError(
+                    `code-executer.controller :: codeRunner :: ${error}`,
+                    error.statusCode || 500
+                )
+            );
+        }
+    }
+);

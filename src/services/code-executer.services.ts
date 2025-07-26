@@ -18,7 +18,6 @@ async function getResult(token: string) {
         const res = await judge0.get(`/submissions/${token}`);
 
         if (res.data.status.id !== 1 && res.data.status.id !== 2) {
-            console.log(res.data);
             return res.data;
         }
 

@@ -112,4 +112,10 @@ export default function editorSockets(
         if (!roomId) return;
         socket.to(roomId).emit("languageUpdate", language);
     });
+
+    socket.on("updateTerminal", (data: any) => {
+        const { roomId } = socket.data;
+        if (!roomId) return;
+        socket.to(roomId).emit("updateTerminal", data);
+    });
 }
