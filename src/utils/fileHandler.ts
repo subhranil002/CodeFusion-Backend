@@ -35,6 +35,7 @@ const uploadImageToCloud = async (localFilePath: string) => {
     try {
         const response: any = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "image",
+            folder: constants.CLOUDINARY_FOLDER,
             moderation: constants.CLOUDINARY_IMAGE_MODERATION,
         });
 
