@@ -1,6 +1,6 @@
 import { Document, Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import constants from "../constants.js";
 
 interface IUser {
@@ -10,8 +10,8 @@ interface IUser {
 
 interface IUserMethods {
     isPasswordCorrect(plainTextPassword: string): Promise<boolean>;
-    generateAccessToken(): Promise<string>;
-    generateRefreshToken(): Promise<string>;
+    generateAccessToken(): string;
+    generateRefreshToken(): string;
 }
 
 const userSchema = new Schema<IUser, {}, IUserMethods>(
@@ -42,27 +42,23 @@ userSchema.methods = {
     isPasswordCorrect: async function (plainTextPassword: string) {
         return await bcrypt.compare(plainTextPassword, this.password);
     },
-    generateAccessToken: async function () {
-        return jwt.sign<any>(
-            {
-                _id: this._id,
-            },
-            constants.ACCESS_TOKEN_SECRET,
-            {
-                expiresIn: constants.ACCESS_TOKEN_EXPIRE,
-            }
-        );
+    generateAccessToken: function () {
+        const payload = { _id: this._id };
+        const secret = constants.ACCESS_TOKEN_SECRET;
+        const options: SignOptions = {
+            expiresIn: constants.ACCESS_TOKEN_EXPIRE as any,
+        };
+
+        return jwt.sign(payload, secret, options);
     },
     generateRefreshToken: function () {
-        return jwt.sign<any>(
-            {
-                _id: this._id,
-            },
-            constants.REFRESH_TOKEN_SECRET,
-            {
-                expiresIn: constants.REFRESH_TOKEN_EXPIRE,
-            }
-        );
+        const payload = { _id: this._id };
+        const secret = constants.REFRESH_TOKEN_SECRET;
+        const options: SignOptions = {
+            expiresIn: constants.REFRESH_TOKEN_EXPIRE as any,
+        };
+
+        return jwt.sign(payload, secret, options);
     },
 };
 

@@ -3,8 +3,8 @@ import { userDocument } from "../models/user.model.js";
 
 const generateAccessAndRefreshToken = async (user: userDocument) => {
     try {
-        const accessToken = await user.generateAccessToken();
-        const refreshToken = await user.generateRefreshToken();
+        const accessToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
 
         return { accessToken, refreshToken };
     } catch (error) {
