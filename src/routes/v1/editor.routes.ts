@@ -1,4 +1,4 @@
-import { codeRunner, getLanguages } from "../../controllers/code-executer.controllers.js";
+import { codeRunner, getLanguages } from "../../controllers/editor.controllers.js";
 import { Router } from "express";
 
 const router = Router();
