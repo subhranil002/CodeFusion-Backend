@@ -1,11 +1,17 @@
-import { Document, Schema, model } from "mongoose";
+import mongoose, { Document, Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt, { SignOptions } from "jsonwebtoken";
 import constants from "../constants.js";
 
 interface IUser {
-    name: string;
+    fullName: string;
+    email: string;
     password: string;
+    avatar: {
+        public_id: string;
+        secure_url: string;
+    };
+    rooms: mongoose.Types.ObjectId[];
 }
 
 interface IUserMethods {
@@ -16,13 +22,32 @@ interface IUserMethods {
 
 const userSchema = new Schema<IUser, {}, IUserMethods>(
     {
-        name: {
+        fullName: {
             type: String,
             required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
         },
         password: {
             type: String,
             required: true,
+        },
+        avatar: {
+            public_id: {
+                type: String,
+                required: true,
+            },
+            secure_url: {
+                type: String,
+                required: true,
+            },
+        },
+        rooms: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: "rooms",
         },
     },
     {
