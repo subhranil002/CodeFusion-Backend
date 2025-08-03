@@ -11,7 +11,11 @@ interface IUser {
         public_id: string;
         secure_url: string;
     };
+    roles: string;
     rooms: mongoose.Types.ObjectId[];
+    refreshToken: string;
+    forgotPasswordToken: string;
+    forgotPasswordExpiry: Date;
 }
 
 interface IUserMethods {
@@ -23,32 +27,47 @@ interface IUserMethods {
 const userSchema = new Schema<IUser, {}, IUserMethods>(
     {
         fullName: {
-            type: String,
-            required: true,
+            type: "String",
+            required: [true, "Name is required"],
+            trim: true,
         },
         email: {
-            type: String,
-            required: true,
+            type: "String",
+            required: [true, "Email is required"],
+            lowercase: true,
+            trim: true,
             unique: true,
+            match: [
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                "Invalid email address",
+            ],
         },
         password: {
-            type: String,
-            required: true,
+            type: "String",
+            required: [true, "Password is required"],
+            minLength: [8, "Password must be at least 8 characters"],
+            select: false,
         },
         avatar: {
             public_id: {
-                type: String,
-                required: true,
+                type: "String",
             },
             secure_url: {
-                type: String,
-                required: true,
+                type: "String",
             },
+        },
+        roles: {
+            type: String,
+            enum: ["ADMIN", "CODER", "GUEST"],
+            default: "CODER",
         },
         rooms: {
             type: [mongoose.Schema.Types.ObjectId],
             ref: "rooms",
         },
+        refreshToken: String,
+        forgotPasswordToken: String,
+        forgotPasswordExpiry: Date,
     },
     {
         timestamps: true,
