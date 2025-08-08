@@ -30,7 +30,7 @@ const roomSchema = new Schema<IRoom, {}, {}>(
         },
         code: {
             type: String,
-            required: true,
+            default: "// Write code here...",
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,

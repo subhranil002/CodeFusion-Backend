@@ -5,6 +5,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 import cors from "cors";
 import constants from "./constants.js";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
 
 // Middlewares
 app.use(express.json());
@@ -16,13 +17,16 @@ app.use(
 app.use(
     cors({
         origin: constants.FRONTEND_URL,
+        credentials: true,
     })
 );
+app.use(cookieParser());
+app.use(express.static("public"));
 app.use(morgan("dev"));
 
 // Routes
 app.use("/api", appRouter);
-app.all(/./, (req, res, next) => {
+app.all(/./, (req, res) => {
     res.status(404).json({
         success: false,
         message: "Page not found",

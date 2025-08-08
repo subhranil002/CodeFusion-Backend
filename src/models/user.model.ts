@@ -11,7 +11,7 @@ interface IUser {
         public_id: string;
         secure_url: string;
     };
-    roles: string;
+    role: string;
     rooms: mongoose.Types.ObjectId[];
     refreshToken: string;
     forgotPasswordToken: string;
@@ -56,7 +56,7 @@ const userSchema = new Schema<IUser, {}, IUserMethods>(
                 type: "String",
             },
         },
-        roles: {
+        role: {
             type: String,
             enum: ["ADMIN", "CODER", "GUEST"],
             default: "CODER",
