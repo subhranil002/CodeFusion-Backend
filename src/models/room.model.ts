@@ -2,6 +2,7 @@ import mongoose, { Document, Schema, model } from "mongoose";
 
 interface IRoom {
     roomId: string;
+    roomName: string;
     language: {
         id: string;
         name: string;
@@ -17,6 +18,10 @@ const roomSchema = new Schema<IRoom, {}, {}>(
             type: String,
             required: true,
             unique: true,
+        },
+        roomName: {
+            type: String,
+            required: true,
         },
         language: {
             id: {

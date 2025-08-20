@@ -1,17 +1,81 @@
-import { createRoomByUser } from "../services/room.services.js";
+import Room from "../models/room.model.js";
+import {
+    languageList,
+    runCode,
+    createRoomByUser,
+    updateRoomData,
+} from "../services/room.services.js";
+import { getRoomsByUser } from "../services/user.services.js";
 import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
+
+const getLanguages = asyncHandler(
+    async (req, res, next) => {
+        try {
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(
+                        "Languages retrieved successfully",
+                        languageList
+                    )
+                );
+        } catch (error: any) {
+            return next(
+                new ApiError(
+                    `editor.controller :: getLanguages :: ${error}`,
+                    error.statusCode || 500
+                )
+            );
+        }
+    }
+);
+
+const codeRunner = asyncHandler(
+    async (req, res, next) => {
+        try {
+            const { code, langId, stdIn } = req.body;
+
+            if (!code || !langId) {
+                throw new ApiError("All fields are required", 400);
+            }
+
+            const result = await runCode(code, langId, stdIn);
+
+            return res
+                .status(200)
+                .json(new ApiResponse("Code executed successfully", result));
+        } catch (error: any) {
+            return next(
+                new ApiError(
+                    `editor.controller :: codeRunner :: ${error}`,
+                    error.statusCode || 500
+                )
+            );
+        }
+    }
+);
 
 const createRoom = asyncHandler(async (req: any, res, next) => {
     try {
-        const { languageId, languageName } = req.body;
-        if (!languageId || !languageName) {
+        const { roomName, languageId, languageName } = req.body;
+        if (!roomName || !languageId || !languageName) {
             throw new ApiError("All fields are required", 400);
         }
 
-        const room: any = await createRoomByUser(req.user, {
-            id: languageId,
-            name: languageName,
-        });
+        const rooms: any = await getRoomsByUser(req.user);
+        const isRoomExists = rooms.rooms.some(
+            (room: any) => room.roomName === roomName
+        );
+        if (isRoomExists) {
+            throw new ApiError("Room already exists", 400);
+        }
+
+        const room: any = await createRoomByUser(
+            req.user,
+            roomName,
+            languageId,
+            languageName
+        );
 
         return res
             .status(201)
@@ -26,4 +90,29 @@ const createRoom = asyncHandler(async (req: any, res, next) => {
     }
 });
 
-export { createRoom };
+const updateRoom = asyncHandler(async (req: any, res, next) => {
+    try {
+        const { roomId } = req.params;
+        if (!roomId) {
+            throw new ApiError("Room id is required", 400);
+        }
+        const { roomName, code } = req.body;
+
+        const updatedRoomData = await updateRoomData(req.user, roomId, roomName, code);
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse("Room updated successfully", updatedRoomData)
+            );
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: updateRoom: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
+
+export { getLanguages, codeRunner, createRoom, updateRoom };
