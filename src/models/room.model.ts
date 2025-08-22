@@ -36,6 +36,7 @@ const roomSchema = new Schema<IRoom, {}, {}>(
         code: {
             type: String,
             default: "// Write code here...",
+            select: false,
         },
         owner: {
             type: mongoose.Schema.Types.ObjectId,

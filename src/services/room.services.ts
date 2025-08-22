@@ -58,6 +58,19 @@ const checkRoomExists = async (roomId: string) => {
     }
 };
 
+const getRoomByRoomId = async (roomId: string) => {
+    try {
+        const room = await Room.findOne({ roomId }).select("+code");
+        if (!room) {
+            throw new ApiError("Room not found", 404);
+        }
+
+        return room;
+    } catch (error) {
+        throw error;
+    }
+};
+
 const createRoomByUser = async (
     user: any,
     roomName: string,
@@ -71,7 +84,7 @@ const createRoomByUser = async (
             throw new ApiError("Some error occurred", 500);
         }
 
-        const room = await Room.create({
+        const newRoom = await Room.create({
             roomId: newRoomId,
             roomName,
             language: {
@@ -81,6 +94,8 @@ const createRoomByUser = async (
             owner: user._id,
         });
 
+        const room: any = await Room.findById(newRoom._id).select("+code");
+
         await User.findByIdAndUpdate(
             user._id,
             {
@@ -89,7 +104,7 @@ const createRoomByUser = async (
                 },
             },
             { new: true }
-        ).select("rooms");
+        );
 
         return room;
     } catch (error) {
@@ -109,7 +124,7 @@ const updateRoomData = async (
             throw new ApiError("Room not found", 404);
         }
 
-        if (!isRoomExists.owner.equals(user._id)) {
+        if (!isRoomExists.owner.equals(user._id) || !isRoomExists.public) {
             throw new ApiError(
                 "You are not authorized to update this room",
                 403
@@ -123,9 +138,55 @@ const updateRoomData = async (
                 code,
             },
             { new: true }
+        ).select("+code");
+
+        return room;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const joinRoomByRoomId = async (roomId: string) => {
+    try {
+        const room = await Room.findOne({ roomId }).select("+code");
+        if (!room) {
+            throw new ApiError("Room not found", 404);
+        }
+
+        await User.findByIdAndUpdate(
+            room.owner,
+            {
+                $push: {
+                    rooms: room._id,
+                },
+            },
+            { new: true }
         );
 
         return room;
+    } catch (error) {
+        throw error;
+    }
+};
+
+const deleteRoomByRoomId = async (roomId: string) => {
+    try {
+        const room = await Room.findOne({ roomId });
+        if (!room) {
+            throw new ApiError("Room not found", 404);
+        }
+
+        await User.findByIdAndUpdate(
+            room.owner,
+            {
+                $pull: {
+                    rooms: room._id,
+                },
+            },
+            { new: true }
+        );
+
+        return await Room.findByIdAndDelete(room._id);
     } catch (error) {
         throw error;
     }
@@ -135,6 +196,9 @@ export {
     languageList,
     runCode,
     checkRoomExists,
+    getRoomByRoomId,
     createRoomByUser,
     updateRoomData,
+    joinRoomByRoomId,
+    deleteRoomByRoomId,
 };
