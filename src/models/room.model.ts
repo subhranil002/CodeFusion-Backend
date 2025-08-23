@@ -9,7 +9,7 @@ interface IRoom {
     };
     code: string;
     owner: mongoose.Types.ObjectId;
-    public: boolean;
+    anyoneCanEdit: boolean;
 }
 
 const roomSchema = new Schema<IRoom, {}, {}>(
@@ -35,7 +35,7 @@ const roomSchema = new Schema<IRoom, {}, {}>(
         },
         code: {
             type: String,
-            default: "// Write code here...",
+            default: "/* Welcome to CodeFusion! */",
             select: false,
         },
         owner: {
@@ -43,7 +43,7 @@ const roomSchema = new Schema<IRoom, {}, {}>(
             ref: "users",
             required: true,
         },
-        public: {
+        anyoneCanEdit: {
             type: Boolean,
             default: false,
         },

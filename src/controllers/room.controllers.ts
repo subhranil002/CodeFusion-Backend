@@ -3,7 +3,6 @@ import {
     runCode,
     createRoomByUser,
     updateRoomData,
-    getRoomByRoomId,
     joinRoomByRoomId,
     deleteRoomByRoomId,
 } from "../services/room.services.js";
@@ -53,22 +52,22 @@ const codeRunner = asyncHandler(async (req, res, next) => {
     }
 });
 
-const getRoom = asyncHandler(async (req, res, next) => {
+const joinRoom = asyncHandler(async (req: any, res, next) => {
     try {
         const { roomId } = req.params;
         if (!roomId) {
             throw new ApiError("Room id is required", 400);
         }
 
-        const room = await getRoomByRoomId(roomId);
+        const room = await joinRoomByRoomId(req.user, roomId);
 
         return res
             .status(200)
-            .json(new ApiResponse("Room retrieved successfully", room));
+            .json(new ApiResponse("Room joined successfully", room));
     } catch (error: any) {
         return next(
             new ApiError(
-                `room.controller :: getRoom :: ${error}`,
+                `user.controller :: joinRoom: ${error}`,
                 error.statusCode || 500
             )
         );
@@ -116,13 +115,14 @@ const updateRoom = asyncHandler(async (req: any, res, next) => {
         if (!roomId) {
             throw new ApiError("Room id is required", 400);
         }
-        const { roomName, code } = req.body;
+        const { roomName, code, anyoneCanEdit } = req.body;
 
         const updatedRoomData = await updateRoomData(
             req.user,
             roomId,
             roomName,
-            code
+            code,
+            anyoneCanEdit
         );
 
         return res
@@ -140,28 +140,6 @@ const updateRoom = asyncHandler(async (req: any, res, next) => {
     }
 });
 
-const joinRoom = asyncHandler(async (req: any, res, next) => {
-    try {
-        const { roomId } = req.params;
-        if (!roomId) {
-            throw new ApiError("Room id is required", 400);
-        }
-
-        const room = await joinRoomByRoomId(roomId);
-
-        return res
-            .status(200)
-            .json(new ApiResponse("Room joined successfully", room));
-    } catch (error: any) {
-        return next(
-            new ApiError(
-                `user.controller :: joinRoom: ${error}`,
-                error.statusCode || 500
-            )
-        );
-    }
-});
-
 const deleteRoom = asyncHandler(async (req: any, res, next) => {
     try {
         const { roomId } = req.params;
@@ -169,7 +147,7 @@ const deleteRoom = asyncHandler(async (req: any, res, next) => {
             throw new ApiError("Room id is required", 400);
         }
 
-        await deleteRoomByRoomId(roomId);
+        await deleteRoomByRoomId(req.user, roomId);
 
         return res
             .status(200)
@@ -187,7 +165,6 @@ const deleteRoom = asyncHandler(async (req: any, res, next) => {
 export {
     getLanguages,
     codeRunner,
-    getRoom,
     createRoom,
     updateRoom,
     joinRoom,
