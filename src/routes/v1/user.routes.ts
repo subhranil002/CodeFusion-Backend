@@ -7,6 +7,7 @@ import {
     login,
     logout,
     register,
+    updateProfile,
 } from "../../controllers/user.controllers.js";
 import upload from "../../middlewares/multer.middleware.js";
 import {
@@ -28,6 +29,12 @@ router.post(
     changeAvatar
 );
 router.get("/profile", isLoggedIn, getProfile);
+router.put(
+    "/update",
+    isLoggedIn,
+    authorizedRoles(["ADMIN", "CODER"]),
+    updateProfile
+);
 router.get("/rooms", isLoggedIn, getMyRooms);
 
 export default router;

@@ -134,8 +134,7 @@ const updateRoomData = async (
         }
 
         if (
-            !isRoomExists.owner.equals(user._id) &&
-            !isRoomExists.anyoneCanEdit
+            !isRoomExists.owner.equals(user._id)
         ) {
             throw new ApiError(
                 "You are not authorized to update this room",

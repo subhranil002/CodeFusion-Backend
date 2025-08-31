@@ -119,6 +119,23 @@ const updateAvatar = async (user: any, avatarLocalPath: any) => {
     }
 };
 
+const updateUserData = async (user: any, fullName?: string, email?: string) => {
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            user._id,
+            {
+                fullName,
+                email,
+            },
+            { new: true }
+        );
+
+        return updatedUser;
+    } catch (error) {
+        throw error;
+    }
+};
+
 const getRoomsByUser = async (user: any) => {
     try {
         const rooms = await User.findById(user._id)
@@ -137,5 +154,6 @@ export {
     loginGuest,
     logoutUser,
     updateAvatar,
+    updateUserData,
     getRoomsByUser,
 };

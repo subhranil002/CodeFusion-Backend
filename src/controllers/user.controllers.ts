@@ -6,6 +6,7 @@ import {
     logoutUser,
     registerUser,
     updateAvatar,
+    updateUserData,
 } from "../services/user.services.js";
 import {
     ApiError,
@@ -190,13 +191,30 @@ const getProfile = asyncHandler(async (req: any, res, next) => {
     }
 });
 
+const updateProfile = asyncHandler(async (req: any, res, next) => {
+    try {
+        const { fullName, email } = req.body;
+
+        const updatedUser = await updateUserData(req.user, fullName, email);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Profile updated successfully", updatedUser));
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: updateProfile: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
+
 // const forgetPassword = asyncHandler(async (req: any, res, next) => {});
 
 // const resetPassword = asyncHandler(async (req: any, res, next) => {});
 
 // const changePassword = asyncHandler(async (req: any, res, next) => {});
-
-// const updateProfile = asyncHandler(async (req: any, res, next) => {});
 
 // const contactUs = asyncHandler(async (req: any, res, next) => {});
 
@@ -230,5 +248,6 @@ export {
     logout,
     changeAvatar,
     getProfile,
+    updateProfile,
     getMyRooms,
 };

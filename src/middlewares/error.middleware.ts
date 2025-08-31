@@ -22,20 +22,20 @@ const errorMiddleware = (
     }
 
     // Capture the error message part only
-    const errorPattern = / Error: (.*)/;
-    const match = message.match(errorPattern);
-    if (match && match[1]) {
-        message = match[1].trim();
+    const match = message.match(/[^:]+$/);
+    let errorMessage;
+    if (match) {
+        errorMessage = match[0].trim();
     } else {
         let parts = message.split("::");
         console.log(parts);
-        message = parts[parts.length - 1].trim();
+        errorMessage = parts[parts.length - 1].trim();
     }
 
     // Send error response
     return res.status(statusCode || 500).json({
         success: false,
-        message: message || "Something went wrong",
+        message: errorMessage || "Something went wrong",
     });
 };
 

@@ -22,7 +22,7 @@ const getLanguages = asyncHandler(async (req, res, next) => {
     } catch (error: any) {
         return next(
             new ApiError(
-                `editor.controller :: getLanguages :: ${error}`,
+                `editor.controller :: getLanguages: ${error}`,
                 error.statusCode || 500
             )
         );
@@ -45,7 +45,7 @@ const codeRunner = asyncHandler(async (req, res, next) => {
     } catch (error: any) {
         return next(
             new ApiError(
-                `editor.controller :: codeRunner :: ${error}`,
+                `editor.controller :: codeRunner: ${error}`,
                 error.statusCode || 500
             )
         );
