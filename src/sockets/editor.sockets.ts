@@ -160,6 +160,12 @@ export default function editorSockets(
         socket.to(roomId).emit("updateTerminal", data);
     });
 
+    socket.on("roomUpdateTrigger", (data: any) => {
+        const { roomId } = socket.data as { roomId: string | null };
+        if (!roomId) return;
+        socket.to(roomId).emit("roomUpdateTrigger");
+    });
+
     socket.on("kickCall", (userId: { userId: string }) => {
         const { roomId } = socket.data as { roomId: string | null };
         if (!roomId) return;

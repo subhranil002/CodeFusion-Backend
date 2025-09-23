@@ -2,6 +2,7 @@ import { Room, User } from "../models/index.js";
 import { customAlphabet } from "nanoid";
 import { ApiError } from "../utils/index.js";
 import { judge0 } from "../configs/index.js";
+import generateCodeTemplate from "../utils/generateCodeTemplate.js";
 
 const languageList = [
     { id: 110, name: "C" },
@@ -82,7 +83,7 @@ const joinRoomByRoomId = async (user: any, roomId: string) => {
 const createRoomByUser = async (
     user: any,
     roomName: string,
-    languageId: string,
+    languageId: number,
     languageName: string
 ) => {
     try {
@@ -99,6 +100,7 @@ const createRoomByUser = async (
                 id: languageId,
                 name: languageName,
             },
+            code: generateCodeTemplate(languageId),
             owner: user._id,
         });
 

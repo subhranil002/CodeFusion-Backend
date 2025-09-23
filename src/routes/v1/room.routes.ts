@@ -11,7 +11,7 @@ import { isLoggedIn } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get("/languages", isLoggedIn, getLanguages);
+router.get("/languages", getLanguages);
 router.post("/run", isLoggedIn, codeRunner);
 router.get("/join/:roomId", isLoggedIn, joinRoom);
 router.post("/create", isLoggedIn, createRoom);
