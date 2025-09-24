@@ -18,4 +18,10 @@ export default {
     CLOUDINARY_FOLDER: process.env.CLOUDINARY_FOLDER!,
     CLOUDINARY_IMAGE_MODERATION: process.env.CLOUDINARY_IMAGE_MODERATION!,
     RAPIDAPI_KEY: process.env.RAPIDAPI_KEY!,
+    SMTP_HOST: process.env.SMTP_HOST!,
+    SMTP_PORT: process.env.SMTP_PORT!,
+    SMTP_SECURE: process.env.SMTP_SECURE!,
+    SMTP_USERNAME: process.env.SMTP_USERNAME!,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD!,
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL!,
 };
