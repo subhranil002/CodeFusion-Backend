@@ -1,10 +1,14 @@
 import { User } from "../models/index.js";
 import {
+    changePasswordService,
+    contactUsService,
+    forgotPasswordService,
     getRoomsByUser,
     loginGuest,
     loginUser,
     logoutUser,
     registerUser,
+    resetPasswordService,
     updateAvatar,
     updateUserData,
 } from "../services/user.services.js";
@@ -210,13 +214,76 @@ const updateProfile = asyncHandler(async (req: any, res, next) => {
     }
 });
 
-// const forgetPassword = asyncHandler(async (req: any, res, next) => {});
+const forgotPassword = asyncHandler(async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            throw new ApiError("Email is required", 400);
+        }
 
-// const resetPassword = asyncHandler(async (req: any, res, next) => {});
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new ApiError("Email not registered", 400);
+        }
 
-// const changePassword = asyncHandler(async (req: any, res, next) => {});
+        await forgotPasswordService(user);
 
-// const contactUs = asyncHandler(async (req: any, res, next) => {});
+        return res
+            .status(200)
+            .json(new ApiResponse("Reset password link sent successfully"));
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: forgotPassword: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
+
+const resetPassword = asyncHandler(async (req, res, next) => {
+    try {
+        const { resetToken, password } = req.body;
+        if (!resetToken || !password) {
+            throw new ApiError("All fields are required", 400);
+        }
+
+        await resetPasswordService(resetToken, password);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Password reset successfully"));
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: resetPassword: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
+
+const changePassword = asyncHandler(async (req: any, res, next) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        if (!oldPassword || !newPassword) {
+            throw new ApiError("All fields are required", 400);
+        }
+
+        await changePasswordService(req.user._id, oldPassword, newPassword);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Password changed successfully"));
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: changePassword: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
 
 const getMyRooms = asyncHandler(async (req: any, res, next) => {
     try {
@@ -241,6 +308,28 @@ const getMyRooms = asyncHandler(async (req: any, res, next) => {
     }
 });
 
+const contactUs = asyncHandler(async (req, res, next) => {
+    try {
+        const { name, email, message } = req.body;
+        if (!name || !email || !message) {
+            throw new ApiError("All fields are required", 400);
+        }
+
+        await contactUsService(name, email, message);
+
+        return res
+            .status(200)
+            .json(new ApiResponse("Message sent successfully"));
+    } catch (error: any) {
+        return next(
+            new ApiError(
+                `user.controller :: contactUs: ${error}`,
+                error.statusCode || 500
+            )
+        );
+    }
+});
+
 export {
     register,
     login,
@@ -249,5 +338,9 @@ export {
     changeAvatar,
     getProfile,
     updateProfile,
+    forgotPassword,
+    resetPassword,
+    changePassword,
     getMyRooms,
+    contactUs,
 };

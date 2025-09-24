@@ -1,12 +1,16 @@
 import { Router } from "express";
 import {
     changeAvatar,
+    changePassword,
+    contactUs,
+    forgotPassword,
     getMyRooms,
     getProfile,
     guestLogin,
     login,
     logout,
     register,
+    resetPassword,
     updateProfile,
 } from "../../controllers/user.controllers.js";
 import upload from "../../middlewares/multer.middleware.js";
@@ -35,6 +39,15 @@ router.put(
     authorizedRoles(["ADMIN", "CODER"]),
     updateProfile
 );
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password", resetPassword);
+router.post(
+    "/change-password",
+    isLoggedIn,
+    authorizedRoles(["ADMIN", "CODER"]),
+    changePassword
+);
 router.get("/rooms", isLoggedIn, getMyRooms);
+router.post("/contact", contactUs);
 
 export default router;
