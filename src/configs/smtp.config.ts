@@ -1,23 +1,10 @@
-import nodemailer, { Transporter } from "nodemailer";
+import { google } from "googleapis";
 import constants from "../constants.js";
 
-const smtpTransport: Transporter = nodemailer.createTransport({
-    host: constants.SMTP_HOST,
-    port: 465,
-    secure: true,
-    auth: {
-        user: constants.SMTP_USERNAME,
-        pass: constants.SMTP_PASSWORD,
-    },
-});
+const oauth2Client = new google.auth.OAuth2(
+    constants.GOOGLE_CLIENT_ID,
+    constants.GOOGLE_CLIENT_SECRET
+);
+oauth2Client.setCredentials({ refresh_token: constants.GOOGLE_REFRESH_TOKEN });
 
-(async () => {
-    try {
-        await smtpTransport.verify();
-        console.log("SMTP verified: ready to send emails");
-    } catch (error) {
-        console.error("SMTP verification failed:", error);
-    }
-})();
-
-export default smtpTransport;
+export default oauth2Client;
