@@ -29,7 +29,7 @@ const getLanguages = asyncHandler(async (req, res, next) => {
     }
 });
 
-const codeRunner = asyncHandler(async (req, res, next) => {
+const codeRunner = asyncHandler(async (req:any, res, next) => {
     try {
         const { code, langId, stdIn } = req.body;
 
@@ -37,6 +37,8 @@ const codeRunner = asyncHandler(async (req, res, next) => {
             throw new ApiError("All fields are required", 400);
         }
 
+        req.user.codeExecutionCount++;
+        req.user.save();
         const result = await runCode(code, langId, stdIn);
 
         return res

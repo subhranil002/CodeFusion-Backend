@@ -16,6 +16,14 @@ interface IUser {
     refreshToken: string;
     forgotPasswordToken: string;
     forgotPasswordExpiry: Date;
+    subscription: {
+        id: string;
+        status: string;
+        expiresOn: Date;
+    };
+    codeExecutionCount: number;
+    aiInteractionCount: number;
+    countUpdateDate: Date;
 }
 
 interface IUserMethods {
@@ -68,6 +76,43 @@ const userSchema = new Schema<IUser, {}, IUserMethods>(
         refreshToken: String,
         forgotPasswordToken: String,
         forgotPasswordExpiry: Date,
+        subscription: {
+            id: {
+                type: String,
+                default: "",
+            },
+            plan: {
+                type: String,
+                enum: ["free", "basic", "pro"],
+                default: "free",
+            },
+            status: {
+                type: String,
+                enum: [
+                    "created",
+                    "active",
+                    "cancelled",
+                    "completed",
+                    "expired",
+                ],
+                default: "completed",
+            },
+            expiresOn: {
+                type: Date,
+            },
+        },
+        codeExecutionCount: {
+            type: Number,
+            default: 0,
+        },
+        aiInteractionCount: {
+            type: Number,
+            default: 0,
+        },
+        countUpdateDate: {
+            type: Date,
+            default: new Date(),
+        },
     },
     {
         timestamps: true,

@@ -102,20 +102,18 @@ const isLoggedIn = async (req: any, res: any, next: any) => {
 
 type Role = "ADMIN" | "CODER" | "GUEST";
 
-const authorizedRoles =
-    (roles: Role[]) =>
-    (req: any, res: any, next: any) => {
-        if (!req.user) {
-            return next(new ApiError("Authentication required", 401));
-        }
+const authorizedRoles = (roles: Role[]) => (req: any, res: any, next: any) => {
+    if (!req.user) {
+        return next(new ApiError("Authentication required", 401));
+    }
 
-        if (!roles.includes(req.user.role)) {
-            return next(
-                new ApiError("You are not authorized to access this route", 403)
-            );
-        }
+    if (!roles.includes(req.user.role)) {
+        return next(
+            new ApiError("You are not authorized to access this route", 403)
+        );
+    }
 
-        next();
-    };
+    next();
+};
 
 export { isLoggedIn, authorizedRoles };
