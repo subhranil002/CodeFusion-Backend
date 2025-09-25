@@ -1,0 +1,145 @@
+import { Room, User } from "../models/index.js";
+import { customAlphabet } from "nanoid";
+import { ApiError } from "../utils/index.js";
+import { judge0 } from "../configs/index.js";
+import generateCodeTemplate from "../utils/generateCodeTemplate.js";
+const languageList = [
+    { id: 110, name: "C" },
+    { id: 105, name: "CPP" },
+    { id: 107, name: "Go" },
+    { id: 91, name: "Java" },
+    { id: 102, name: "JavaScript" },
+    { id: 111, name: "Kotlin" },
+    { id: 98, name: "PHP" },
+    { id: 109, name: "Python" },
+    { id: 72, name: "Ruby" },
+    { id: 108, name: "Rust" },
+    { id: 46, name: "Shell" },
+    { id: 101, name: "TypeScript" },
+];
+const runCode = async (code, langId, stdin = "") => {
+    try {
+        const payload = {
+            source_code: code,
+            language_id: langId,
+            stdin,
+            cpu_time_limit: "5",
+            memory_limit: "128000",
+        };
+        const response = await judge0.post("/submissions", payload);
+        while (true) {
+            const result = await judge0.get(`/submissions/${response.data.token}`);
+            if (result.data.status.id !== 1 && result.data.status.id !== 2) {
+                return result.data;
+            }
+            await new Promise((r) => setTimeout(r, 500));
+        }
+    }
+    catch (error) {
+        throw new ApiError(error, 422);
+    }
+};
+const checkRoomExists = async (roomId) => {
+    try {
+        const isRoomExists = await Room.findOne({ roomId });
+        if (isRoomExists) {
+            return true;
+        }
+        return false;
+    }
+    catch (error) {
+        throw error;
+    }
+};
+const joinRoomByRoomId = async (user, roomId) => {
+    try {
+        const room = await Room.findOne({ roomId }).select("+code");
+        if (!room) {
+            throw new ApiError("Room not found", 404);
+        }
+        if (!user.rooms.includes(room._id)) {
+            await User.findByIdAndUpdate(user._id, {
+                $push: {
+                    rooms: room._id,
+                },
+            });
+        }
+        return room;
+    }
+    catch (error) {
+        throw error;
+    }
+};
+const createRoomByUser = async (user, roomName, languageId, languageName) => {
+    try {
+        const alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const newRoomId = customAlphabet(alphabet, 6)();
+        if (await checkRoomExists(newRoomId)) {
+            throw new ApiError("Some error occurred", 500);
+        }
+        const newRoom = await Room.create({
+            roomId: newRoomId,
+            roomName,
+            language: {
+                id: languageId,
+                name: languageName,
+            },
+            code: generateCodeTemplate(languageId),
+            owner: user._id,
+        });
+        const room = await Room.findById(newRoom._id).select("+code");
+        await User.findByIdAndUpdate(user._id, {
+            $push: {
+                rooms: room._id,
+            },
+        }, { new: true });
+        return room;
+    }
+    catch (error) {
+        throw error;
+    }
+};
+const updateRoomData = async (user, roomId, roomName, code, anyoneCanEdit) => {
+    try {
+        const isRoomExists = await Room.findOne({ roomId });
+        if (!isRoomExists) {
+            throw new ApiError("Room not found", 404);
+        }
+        if (!isRoomExists.owner.equals(user._id)) {
+            throw new ApiError("You are not authorized to update this room", 403);
+        }
+        const room = await Room.findByIdAndUpdate(isRoomExists._id, {
+            roomName,
+            code,
+            anyoneCanEdit,
+        }, { new: true }).select("+code");
+        return room;
+    }
+    catch (error) {
+        throw error;
+    }
+};
+const deleteRoomByRoomId = async (user, roomId) => {
+    try {
+        const room = await Room.findOne({ roomId });
+        if (!room) {
+            throw new ApiError("Room not found", 404);
+        }
+        if (!user.rooms.includes(room._id)) {
+            throw new ApiError("You have not joined/created this room", 403);
+        }
+        await User.findByIdAndUpdate(user._id, {
+            $pull: {
+                rooms: room._id,
+            },
+        });
+        if (room.owner.equals(user._id)) {
+            await Room.findByIdAndDelete(room._id);
+            await User.updateMany({ rooms: room._id }, { $pull: { rooms: room._id } });
+        }
+    }
+    catch (error) {
+        throw error;
+    }
+};
+export { languageList, runCode, checkRoomExists, createRoomByUser, updateRoomData, joinRoomByRoomId, deleteRoomByRoomId, };
