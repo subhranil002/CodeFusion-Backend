@@ -23,4 +23,8 @@ export default {
     GOOGLE_REFRESH_TOKEN: process.env.GOOGLE_REFRESH_TOKEN!,
     GMAIL_USER: process.env.GMAIL_USER!,
     ADMIN_EMAIL: process.env.ADMIN_EMAIL!,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID!,
+    RAZORPAY_SECRET: process.env.RAZORPAY_SECRET!,
+    RAZORPAY_PLAN_ID_BASIC: process.env.RAZORPAY_PLAN_ID_BASIC!,
+    RAZORPAY_PLAN_ID_PRO: process.env.RAZORPAY_PLAN_ID_PRO!,
 };

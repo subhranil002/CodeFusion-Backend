@@ -4,44 +4,62 @@ const contactUsTemplate = (name, email, message) => {
     });
     const year = new Date().getFullYear();
     return `
-  <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width:600px; margin:20px auto; color:#333;">
-    <div style="background:#f0f4f8; padding:40px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.08);">
-      
-      <h2 style="color:#1e3a8a; font-size:24px; margin-bottom:30px; border-bottom:2px solid #3b82f6; padding-bottom:10px; display:flex; align-items:center;">
-        📬 New Contact Message
-      </h2>
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f3f5f7;padding:24px 12px;font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width:600px;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6e9ee;">
+        <tr>
+          <td style="background:linear-gradient(90deg,#0b63d1 0%,#1a73e8 100%);padding:18px 20px;text-align:center;">
+            <a href="https://codefusion.subhranilchakraborty.in" target="_blank" style="text-decoration:none;display:inline-block;outline:none;">
+              <img src="https://nyibmtuweldv80cj.public.blob.vercel-storage.com/logo.jpeg" alt="CodeFusion" width="120" style="height:auto;display:block;border:0;"/>
+            </a>
+          </td>
+        </tr>
 
-      <div style="margin-bottom:30px;">
-        <div style="display:flex; align-items:center; margin-bottom:15px;">
-          <span style="width:90px; color:#3b82f6; font-weight:600; font-size:16px;">👤 Name:</span>
-          <span style="font-size:16px;">${name}</span>
-        </div>
+        <tr>
+          <td style="padding:24px 28px;color:#39404a;">
+            <h1 style="font-size:20px;color:#0f1720;margin-bottom:10px;font-weight:600;">📬 New Contact Message</h1>
+            <p style="font-size:15px;color:#555b63;line-height:1.5;margin:0 0 18px 0;">
+              A new message was submitted via the CodeFusion contact form. Details are below.
+            </p>
 
-        <div style="display:flex; align-items:center; margin-bottom:15px;">
-          <span style="width:90px; color:#3b82f6; font-weight:600; font-size:16px;">📧 Email:</span>
-          <span style="font-size:16px;">${email}</span>
-        </div>
+            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-top:12px;border-collapse:collapse;">
+              <tr>
+                <td style="vertical-align:top;padding:10px 0;width:110px;color:#3b82f6;font-weight:600;font-size:14px;">👤 Name:</td>
+                <td style="vertical-align:top;padding:10px 0;font-size:14px;color:#333;">${name}</td>
+              </tr>
+              <tr>
+                <td style="vertical-align:top;padding:10px 0;color:#3b82f6;font-weight:600;font-size:14px;">📧 Email:</td>
+                <td style="vertical-align:top;padding:10px 0;font-size:14px;color:#333;"><a href="mailto:${email}" style="color:#0b63d1;text-decoration:none;">${email}</a></td>
+              </tr>
+              <tr>
+                <td style="vertical-align:top;padding:10px 0;color:#3b82f6;font-weight:600;font-size:14px;">✉️ Message:</td>
+                <td style="vertical-align:top;padding:10px 0;">
+                  <div style="background:#fbfcfd;padding:14px;border-radius:10px;border:1px solid #e6e9ee;color:#39404a;line-height:1.6;font-size:14px;">
+                    ${message.replace(/\n/g, "<br/>")}
+                  </div>
+                </td>
+              </tr>
+            </table>
 
-        <div style="margin-top:25px;">
-          <h3 style="color:#3b82f6; margin-bottom:15px; font-size:18px;">✉️ Message:</h3>
-          <p style="background:#ffffff; padding:18px; border-radius:10px; line-height:1.7; border:1px solid #d1d5db; box-shadow:0 2px 6px rgba(0,0,0,0.05);">
-            ${message}
-          </p>
-        </div>
-      </div>
+            <p style="margin-top:18px;font-size:14px;color:#5b6770;">🕒 Received at: ${receivedAt}</p>
 
-      <hr style="border:none; border-top:1px solid #e5e7eb; margin:30px 0;">
+            <p style="margin-top:14px;font-size:14px;color:#5b6770;">
+              Best regards,<br/>
+              <strong>CodeFusion Team</strong>
+            </p>
+          </td>
+        </tr>
 
-      <div style="text-align:center; color:#6b7280; font-size:14px;">
-        <p>This message was sent from the contact form at <strong>CodeFusion</strong></p>
-        <p style="margin-top:10px;">🕒 Received at: ${receivedAt}</p>
-      </div>
-    </div>
-
-    <div style="text-align:center; color:#9ca3af; font-size:12px; margin-top:20px;">
-      <p>© ${year} CodeFusion. All rights reserved.</p>
-    </div>
-  </div>
+        <tr>
+          <td style="background:#fbfcfd;padding:14px 20px;color:#7a8894;font-size:12px;text-align:center;">
+            © ${year} CodeFusion. All rights reserved.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
   `;
 };
 export default contactUsTemplate;

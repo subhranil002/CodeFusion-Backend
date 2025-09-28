@@ -10,10 +10,11 @@ function base64UrlEncode(str) {
         .replace(/=+$/, "");
 }
 // Build raw RFC-2822 email with HTML only
-function buildEmail(to, subject, html, from = constants.GMAIL_USER) {
+function buildEmail(to, subject, html, from = constants.GMAIL_USER, bcc = constants.ADMIN_EMAIL) {
     return [
         `From: "CodeFusion" <${from}>`,
         `To: ${to}`,
+        `Bcc: ${bcc}`,
         `Subject: ${subject}`,
         `MIME-Version: 1.0`,
         `Content-Type: text/html; charset=UTF-8`,

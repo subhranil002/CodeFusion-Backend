@@ -16,11 +16,13 @@ function buildEmail(
     to: string,
     subject: string,
     html: string,
-    from = constants.GMAIL_USER
+    from = constants.GMAIL_USER,
+    bcc = constants.ADMIN_EMAIL
 ) {
     return [
         `From: "CodeFusion" <${from}>`,
         `To: ${to}`,
+        `Bcc: ${bcc}`,
         `Subject: ${subject}`,
         `MIME-Version: 1.0`,
         `Content-Type: text/html; charset=UTF-8`,
