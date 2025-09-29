@@ -7,6 +7,7 @@ import {
     allPayments,
     buyBasicSubscription,
     buyProSubscription,
+    cancelSubscription,
     getPaymentHistory,
     getRazorpayApiKey,
     verifySubscription,
@@ -15,13 +16,13 @@ import {
 const router = Router();
 
 router.get("/apikey", isLoggedIn, getRazorpayApiKey);
-router.post(
+router.get(
     "/buy/basic",
     isLoggedIn,
     authorizedRoles(["GUEST", "CODER"]),
     buyBasicSubscription
 );
-router.post(
+router.get(
     "/buy/pro",
     isLoggedIn,
     authorizedRoles(["GUEST", "CODER"]),
@@ -32,6 +33,12 @@ router.post(
     isLoggedIn,
     authorizedRoles(["GUEST", "CODER"]),
     verifySubscription
+);
+router.get(
+    "/cancel",
+    isLoggedIn,
+    authorizedRoles(["GUEST", "CODER"]),
+    cancelSubscription
 );
 router.get("/all", isLoggedIn, authorizedRoles(["ADMIN"]), allPayments);
 router.get(

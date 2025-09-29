@@ -1,3 +1,4 @@
+import { isBefore } from "date-fns";
 import { User } from "../models/index.js";
 import {
     changePasswordService,
@@ -182,6 +183,17 @@ const changeAvatar = asyncHandler(async (req: any, res, next) => {
 
 const getProfile = asyncHandler(async (req: any, res, next) => {
     try {
+        if (
+            req.user.subscription.status === "active" &&
+            isBefore(req.user.subscription.expiresOn, new Date())
+        ) {
+            req.user.subscription.id = null;
+            req.user.subscription.plan = "free";
+            req.user.subscription.status = "completed";
+            req.user.subscription.expiresOn = null;
+            await req.user.save();
+        }
+
         return res
             .status(200)
             .json(new ApiResponse("Profile fetched successfully", req.user));

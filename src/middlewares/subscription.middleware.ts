@@ -59,7 +59,7 @@ const checkAiInteractionLimits = async (req: any, res: any, next: any) => {
 const checkRoomLimits = async (req: any, res: any, next: any) => {
     if (
         req?.user?.subscription?.status !== "active" &&
-        req.user.rooms.length === 5
+        req.user.rooms.length >= 5
     ) {
         return next(
             new ApiError("You can only create 5 rooms in free plan", 403)
