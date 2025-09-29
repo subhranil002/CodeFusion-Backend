@@ -1,4 +1,4 @@
-const passwordChangedTemplate = (email) => {
+const passwordChangedTemplate = (name, email) => {
     const year = new Date().getFullYear();
     const changedAt = new Date().toLocaleString("en-IN", {
         timeZone: "Asia/Kolkata",
@@ -19,7 +19,7 @@ const passwordChangedTemplate = (email) => {
           <td style="padding:28px;color:#39404a;">
             <h1 style="font-size:20px;color:#0f1720;margin-bottom:14px;font-weight:600;">Password Changed Successfully</h1>
             <p style="font-size:15px;color:#555b63;line-height:1.5;">
-              Hello, the password for your account <strong>${email}</strong> has been changed successfully. If you did not perform this action, please reset your password immediately or contact our support team.
+              Hello <strong>${name}</strong>, the password for your account <strong>${email}</strong> has been changed successfully. If you did not perform this action, please reset your password immediately or contact our support team.
             </p>
             <p style="margin-top:20px;font-size:14px;color:#5b6770;">🕒 Changed at: ${changedAt}</p>
             <p style="margin-top:16px;font-size:14px;color:#5b6770;">
@@ -29,8 +29,26 @@ const passwordChangedTemplate = (email) => {
           </td>
         </tr>
         <tr>
-          <td style="background:#fbfcfd;padding:14px 20px;color:#7a8894;font-size:12px;text-align:center;">
-            © ${year} CodeFusion. All rights reserved.
+          <td style="background:#fbfcfd;padding:14px 20px 20px 20px;color:#7a8894;font-size:12px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:middle;">
+                  <div style="margin-bottom:6px;">This email was sent to <strong>${email}</strong>.</div>
+                  <div>If you need help, contact us at <a href="mailto:codefusion.subhranil@gmail.com" style="color:#0b63d1;text-decoration:underline;">codefusion.subhranil@gmail.com</a>.</div>
+                </td>
+                <td align="right" style="vertical-align:middle;padding-left:10px;">
+                  <img src="https://nyibmtuweldv80cj.public.blob.vercel-storage.com/logo.jpeg" alt="" width="36" style="display:block;border:0;border-radius:6px;opacity:0.9;" />
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <table role="presentation" width="600" style="max-width:600px;margin-top:14px;">
+        <tr>
+          <td style="text-align:center;font-size:12px;color:#98a0a8;">
+            You received this email because you are registered with CodeFusion. &nbsp;·&nbsp; © ${year} CodeFusion
           </td>
         </tr>
       </table>

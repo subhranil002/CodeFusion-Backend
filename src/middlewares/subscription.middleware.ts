@@ -1,17 +1,7 @@
-import { isToday } from "date-fns";
 import ApiError from "../utils/ApiError.js";
 
-const resetLimits = async (req: any) => {
-    if (!isToday(req?.user?.countUpdateDate)) {
-        req.user.countUpdateDate = new Date();
-        req.user.codeExecutionCount = 0;
-        req.user.aiInteractionCount = 0;
-        await req.user.save();
-    }
-};
-
 const checkCodeExecutionLimits = async (req: any, res: any, next: any) => {
-    await resetLimits(req);
+    if (req?.user?.role === "ADMIN") return next();
 
     if (req?.user?.subscription?.status === "active") {
         if (
@@ -34,7 +24,7 @@ const checkCodeExecutionLimits = async (req: any, res: any, next: any) => {
 };
 
 const checkAiInteractionLimits = async (req: any, res: any, next: any) => {
-    await resetLimits(req);
+    if (req?.user?.role === "ADMIN") return next();
 
     if (req?.user?.subscription?.status === "active") {
         if (
@@ -57,6 +47,8 @@ const checkAiInteractionLimits = async (req: any, res: any, next: any) => {
 };
 
 const checkRoomLimits = async (req: any, res: any, next: any) => {
+    if (req?.user?.role === "ADMIN") return next();
+
     if (
         req?.user?.subscription?.status !== "active" &&
         req.user.rooms.length >= 5

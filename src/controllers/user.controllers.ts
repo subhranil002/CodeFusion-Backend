@@ -19,6 +19,7 @@ import {
     asyncHandler,
     fileHandler,
 } from "../utils/index.js";
+import { isToday } from "date-fns";
 
 const register = asyncHandler(async (req, res, next) => {
     try {
@@ -183,6 +184,13 @@ const changeAvatar = asyncHandler(async (req: any, res, next) => {
 
 const getProfile = asyncHandler(async (req: any, res, next) => {
     try {
+        if (!isToday(req?.user?.countUpdateDate)) {
+            req.user.countUpdateDate = new Date();
+            req.user.codeExecutionCount = 0;
+            req.user.aiInteractionCount = 0;
+            await req.user.save();
+        }
+
         if (
             req.user.subscription.status === "active" &&
             isBefore(req.user.subscription.expiresOn, new Date())

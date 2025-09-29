@@ -1,6 +1,8 @@
+import { isBefore } from "date-fns";
 import { User } from "../models/index.js";
 import { changePasswordService, contactUsService, forgotPasswordService, getRoomsByUser, loginGuest, loginUser, logoutUser, registerUser, resetPasswordService, updateAvatar, updateUserData, } from "../services/user.services.js";
 import { ApiError, ApiResponse, asyncHandler, fileHandler, } from "../utils/index.js";
+import { isToday } from "date-fns";
 const register = asyncHandler(async (req, res, next) => {
     try {
         const { fullName, email, password } = req.body;
@@ -119,6 +121,20 @@ const changeAvatar = asyncHandler(async (req, res, next) => {
 });
 const getProfile = asyncHandler(async (req, res, next) => {
     try {
+        if (!isToday(req?.user?.countUpdateDate)) {
+            req.user.countUpdateDate = new Date();
+            req.user.codeExecutionCount = 0;
+            req.user.aiInteractionCount = 0;
+            await req.user.save();
+        }
+        if (req.user.subscription.status === "active" &&
+            isBefore(req.user.subscription.expiresOn, new Date())) {
+            req.user.subscription.id = null;
+            req.user.subscription.plan = "free";
+            req.user.subscription.status = "completed";
+            req.user.subscription.expiresOn = null;
+            await req.user.save();
+        }
         return res
             .status(200)
             .json(new ApiResponse("Profile fetched successfully", req.user));

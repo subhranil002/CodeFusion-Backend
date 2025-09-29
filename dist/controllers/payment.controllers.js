@@ -1,7 +1,7 @@
 import razorpayInstance from "../configs/razorpay.config.js";
 import constants from "../constants.js";
 import { ApiError, ApiResponse, asyncHandler } from "../utils/index.js";
-import { buyBasicSubscriptionService, buyProSubscriptionService, getPaymentHistoryService, verifySubscriptionService, } from "../services/payment.services.js";
+import { buyBasicSubscriptionService, buyProSubscriptionService, cancelSubscriptionService, getPaymentHistoryService, verifySubscriptionService, } from "../services/payment.services.js";
 const getRazorpayApiKey = asyncHandler(async (req, res, next) => {
     res.status(200).json(new ApiResponse("Api key fetched successfully", {
         key: constants.RAZORPAY_KEY_ID,
@@ -9,7 +9,9 @@ const getRazorpayApiKey = asyncHandler(async (req, res, next) => {
 });
 const buyBasicSubscription = asyncHandler(async (req, res, next) => {
     try {
-        if (req.user.subscription.status === "active") {
+        if (req.user.subscription.status === "active" &&
+            (req.user.subscription.plan === "basic" ||
+                req.user.subscription.plan === "pro")) {
             throw new ApiError("User already has an active subscription", 400);
         }
         const subscription = await buyBasicSubscriptionService(req.user);
@@ -21,7 +23,8 @@ const buyBasicSubscription = asyncHandler(async (req, res, next) => {
 });
 const buyProSubscription = asyncHandler(async (req, res, next) => {
     try {
-        if (req.user.subscription.status === "active") {
+        if (req.user.subscription.status === "active" &&
+            req.user.subscription.plan === "pro") {
             throw new ApiError("User already has an active subscription", 400);
         }
         const subscription = await buyProSubscriptionService(req.user);
@@ -33,18 +36,30 @@ const buyProSubscription = asyncHandler(async (req, res, next) => {
 });
 const verifySubscription = asyncHandler(async (req, res, next) => {
     try {
-        const { razorpay_payment_id, razorpay_signature, amount } = req.body;
+        const { razorpay_payment_id, razorpay_signature, amount, plan } = req.body;
         if (!razorpay_payment_id || !razorpay_signature || !amount) {
             throw new ApiError("All fields are required", 400);
         }
         if (req.user.subscription.status === "active") {
             throw new ApiError("User already has an active subscription", 400);
         }
-        await verifySubscriptionService(req.user, razorpay_payment_id, razorpay_signature, amount);
+        await verifySubscriptionService(req.user, razorpay_payment_id, razorpay_signature, amount, plan);
         res.status(200).json(new ApiResponse("Subscription verified successfully"));
     }
     catch (error) {
         return next(new ApiError(`payment.controller :: verifySubscription: ${error}`, error.statusCode || 500));
+    }
+});
+const cancelSubscription = asyncHandler(async (req, res, next) => {
+    try {
+        if (req.user.subscription.status !== "active") {
+            throw new ApiError("User don't have a subscription", 400);
+        }
+        await cancelSubscriptionService(req.user);
+        res.status(200).json(new ApiResponse("Subscription cancelled successfully"));
+    }
+    catch (error) {
+        return next(new ApiError(`payment.controller :: cancelSubscription: ${error}`, error.statusCode || 500));
     }
 });
 const allPayments = asyncHandler(async (req, res, next) => {
@@ -77,4 +92,4 @@ const getPaymentHistory = asyncHandler(async (req, res, next) => {
         return next(new ApiError(`user.controller :: getPaymentHistory: ${error}`, error.statusCode || 500));
     }
 });
-export { getRazorpayApiKey, buyBasicSubscription, buyProSubscription, verifySubscription, allPayments, getPaymentHistory, };
+export { getRazorpayApiKey, buyBasicSubscription, buyProSubscription, verifySubscription, cancelSubscription, allPayments, getPaymentHistory, };

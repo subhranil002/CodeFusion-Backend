@@ -145,7 +145,7 @@ const resetPasswordService = async (resetToken, password) => {
         user.forgotPasswordToken = undefined;
         user.forgotPasswordExpiry = undefined;
         await user.save();
-        const mailMessage = passwordChangedTemplate(user.email);
+        const mailMessage = passwordChangedTemplate(user.fullName, user.email);
         sendEmail(user.email, "CodeFusion - Password reset success", mailMessage);
     }
     catch (error) {
@@ -160,7 +160,7 @@ const changePasswordService = async (user_id, oldPassword, newPassword) => {
         }
         user.password = newPassword;
         await user.save();
-        const mailMessage = passwordChangedTemplate(user.email);
+        const mailMessage = passwordChangedTemplate(user.fullName, user.email);
         sendEmail(user.email, "CodeFusion - Password changed successfully", mailMessage);
     }
     catch (error) {
