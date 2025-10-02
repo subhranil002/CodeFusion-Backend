@@ -131,21 +131,32 @@ const cancelSubscription = asyncHandler(async (req: any, res, next) => {
 const getAllPayments = asyncHandler(async (req, res, next) => {
     try {
         const { start, limit } = req.body;
-        if (!start || start < 0) {
-            throw new ApiError("Start must be a positive number", 400);
+        if (start === undefined || start === null || Number(start) < 0) {
+            throw new ApiError("Start must be a non-negative number", 400);
         }
-        if (!limit || limit <= 0) {
+        if (limit === undefined || limit === null || Number(limit) <= 0) {
             throw new ApiError("Limit must be a positive number", 400);
         }
 
-        const { total, purchases } = await getAllPaymentsService(start, limit);
+        const {
+            purchases,
+            totalRevenue,
+            totalTransactions,
+            completedCount,
+            successRate,
+            avgTransactionPrice,
+        } = await getAllPaymentsService(start, limit);
 
         res.status(200).json(
             new ApiResponse("All payments fetched successfully", {
                 start,
                 limit,
-                total,
                 purchases,
+                totalRevenue,
+                totalTransactions,
+                completedCount,
+                successRate,
+                avgTransactionPrice,
             })
         );
     } catch (error: any) {

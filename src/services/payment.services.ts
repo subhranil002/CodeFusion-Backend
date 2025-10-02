@@ -126,17 +126,55 @@ const cancelSubscriptionService = async (user: any) => {
 
 const getAllPaymentsService = async (start: string, limit: string) => {
     try {
-        const [total, purchases] = await Promise.all([
-            Payment.countDocuments().exec(),
+        const startNum = Number(start);
+        const limitNum = Number(limit);
+
+        const [purchases, stats] = await Promise.all([
             Payment.find()
                 .sort({ createdAt: -1 })
-                .skip(Number(start))
-                .limit(Number(limit))
+                .skip(startNum)
+                .limit(limitNum)
                 .populate({ path: "purchasedBy", select: "fullName email" })
                 .exec(),
+            Payment.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: { $sum: "$amount" },
+                        totalTransactions: { $sum: 1 },
+                        completedCount: {
+                            $sum: {
+                                $cond: [
+                                    { $eq: ["$status", "completed"] },
+                                    1,
+                                    0,
+                                ],
+                            },
+                        },
+                        avgTransactionPrice: { $avg: "$amount" },
+                    },
+                },
+            ]),
         ]);
 
-        return { total, purchases };
+        const totalRevenue = stats[0]?.totalRevenue || 0;
+        const totalTransactions = stats[0]?.totalTransactions || 0;
+        const completedCount = stats[0]?.completedCount || 0;
+        const avgTransactionPrice = stats[0]?.avgTransactionPrice || 0;
+
+        const successRate =
+            totalTransactions > 0
+                ? (completedCount / totalTransactions) * 100
+                : 0;
+
+        return {
+            purchases,
+            totalRevenue,
+            totalTransactions,
+            completedCount,
+            successRate: successRate.toFixed(2),
+            avgTransactionPrice,
+        };
     } catch (error) {
         throw error;
     }
