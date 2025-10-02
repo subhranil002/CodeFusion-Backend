@@ -17,7 +17,7 @@ const paymentSchema = new Schema({
     },
     purchasedBy: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "users",
     },
     status: {
         type: String,

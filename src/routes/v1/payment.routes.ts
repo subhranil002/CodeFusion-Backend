@@ -4,10 +4,10 @@ import {
     isLoggedIn,
 } from "../../middlewares/auth.middleware.js";
 import {
-    allPayments,
     buyBasicSubscription,
     buyProSubscription,
     cancelSubscription,
+    getAllPayments,
     getPaymentHistory,
     getRazorpayApiKey,
     verifySubscription,
@@ -40,7 +40,7 @@ router.get(
     authorizedRoles(["GUEST", "CODER"]),
     cancelSubscription
 );
-router.get("/all", isLoggedIn, authorizedRoles(["ADMIN"]), allPayments);
+router.post("/all", isLoggedIn, authorizedRoles(["ADMIN"]), getAllPayments);
 router.get(
     "/history",
     isLoggedIn,

@@ -28,7 +28,7 @@ const paymentSchema = new Schema<IPayment>(
         },
         purchasedBy: {
             type: Schema.Types.ObjectId,
-            ref: "User",
+            ref: "users",
         },
         status: {
             type: String,
